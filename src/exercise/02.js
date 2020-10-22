@@ -27,42 +27,46 @@ function asyncReducer(state, action) {
   }
 }
 
-const useAsync = (asyncCallback, initialState) => {
-  const [state, dispatch] = React.useReducer(asyncReducer, {
-    ...initialState,
-    data: null,
-    error: null,
-  })
-
-  React.useEffect(() => {
-    const promise = asyncCallback()
-    if (!promise) return
-
+const useAsync = initialState => {
+  const run = React.useCallback(promise => {
     dispatch({type: 'pending'})
     promise.then(
       data => {
         dispatch({type: 'resolved', data})
       },
       error => {
+        if (error.name === 'AbortError') return
+
         dispatch({type: 'rejected', error})
       },
     )
-  }, [asyncCallback])
+  }, [])
 
-  return state
+  const [state, dispatch] = React.useReducer(asyncReducer, {
+    ...initialState,
+    data: null,
+    error: null,
+  })
+
+  return {...state, run}
 }
 
 function PokemonInfo({pokemonName}) {
-  const fetchNamedPokemon = React.useCallback(
-    () => (pokemonName ? fetchPokemon(pokemonName) : null),
-    [pokemonName],
-  )
-
-  const state = useAsync(fetchNamedPokemon, {
+  const {data, status, error, run} = useAsync({
     status: pokemonName ? 'pending' : 'idle',
   })
 
-  const {data, status, error} = state
+  React.useEffect(() => {
+    if (!pokemonName) {
+      return
+    }
+    const controller = new AbortController()
+    run(fetchPokemon(pokemonName, 1000, controller.signal))
+
+    return () => {
+      controller.abort()
+    }
+  }, [pokemonName, run])
 
   if (status === 'idle' || !pokemonName) {
     return 'Submit a pokemon'

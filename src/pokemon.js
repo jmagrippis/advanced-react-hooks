@@ -7,7 +7,7 @@ const formatDate = date =>
   ).padStart(2, '0')}.${String(date.getMilliseconds()).padStart(3, '0')}`
 
 // the delay argument is for faking things out a bit
-function fetchPokemon(name, delay = 1500) {
+function fetchPokemon(name, delay = 1500, signal) {
   const pokemonQuery = `
     query PokemonInfo($name: String) {
       pokemon(name: $name) {
@@ -28,6 +28,7 @@ function fetchPokemon(name, delay = 1500) {
 
   return window
     .fetch('https://graphql-pokemon2.vercel.app/', {
+      signal,
       // learn more about this API here: https://graphql-pokemon2.vercel.app/
       method: 'POST',
       headers: {
