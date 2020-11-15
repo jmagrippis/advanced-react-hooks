@@ -1,12 +1,11 @@
 // useLayoutEffect: auto-scrolling textarea
 // http://localhost:3000/isolated/exercise/04.js
 
-import * as React from 'react'
+import {useLayoutEffect, useRef, useState} from 'react'
 
 function MessagesDisplay({messages}) {
-  const containerRef = React.useRef()
-  // 🐨 replace useEffect with useLayoutEffect
-  React.useEffect(() => {
+  const containerRef = useRef()
+  useLayoutEffect(() => {
     containerRef.current.scrollTop = containerRef.current.scrollHeight
   })
 
@@ -29,9 +28,7 @@ function sleep(time = 0) {
 }
 
 function SlooooowSibling() {
-  // try this with useLayoutEffect as well to see
-  // how it impacts interactivity of the page before updates.
-  React.useEffect(() => {
+  useLayoutEffect(() => {
     // increase this number to see a more stark difference
     sleep(300)
   })
@@ -39,7 +36,7 @@ function SlooooowSibling() {
 }
 
 function App() {
-  const [messages, setMessages] = React.useState(allMessages.slice(0, 8))
+  const [messages, setMessages] = useState(allMessages.slice(0, 8))
   const addMessage = () =>
     messages.length < allMessages.length
       ? setMessages(allMessages.slice(0, messages.length + 1))
